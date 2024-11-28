@@ -51,3 +51,8 @@ button:hover {
         padding: 10px;
     }
 }
+
+/* Ensure proper visibility for different pages */
+#signup-page {
+    display: none;
+}
