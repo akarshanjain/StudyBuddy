@@ -2,6 +2,8 @@ let user = null; // Stores the current user data
 let users = JSON.parse(localStorage.getItem("users")) || []; // Mock users database
 let tasks = []; // Sample tasks data
 let flashcards = []; // Sample flashcards data
+// Initialize notes for the current user
+let notes = JSON.parse(localStorage.getItem("notes")) || {};
 
 // Toggle between Login and Sign-Up pages
 function toggleLoginSignUp() {
@@ -107,4 +109,65 @@ function showFlashcardForm() {
         alert("Flashcard saved!");
         showDashboard(); // Re-render dashboard to show updated flashcards
     }
+}
+
+// Update the rich text editor's font
+document.getElementById("font-selector").addEventListener("change", function () {
+    const font = this.value;
+    document.getElementById("rich-editor").style.fontFamily = font;
+});
+
+// Update the rich text editor's font size
+document.getElementById("font-size-selector").addEventListener("change", function () {
+    const fontSize = this.value;
+    document.getElementById("rich-editor").style.fontSize = fontSize;
+});
+
+// Toggle bold text
+function toggleBold() {
+    document.execCommand("bold");
+}
+
+// Toggle italic text
+function toggleItalic() {
+    document.execCommand("italic");
+}
+
+// Toggle bullets
+function toggleBulletList() {
+    document.execCommand("insertUnorderedList");
+}
+
+// Save the formatted note
+function saveFormattedNote() {
+    const editorContent = document.getElementById("rich-editor").innerHTML;
+    if (!notes[user.email]) {
+        notes[user.email] = [];
+    }
+    notes[user.email].push(editorContent); // Save the formatted note
+    localStorage.setItem("notes", JSON.stringify(notes)); // Save to localStorage
+    showNotesSection(); // Refresh notes list
+    document.getElementById("rich-editor").innerHTML = ""; // Clear the editor
+}
+
+// Render the notes list
+function showNotesSection() {
+    const notesList = document.getElementById("notes-list");
+    notesList.innerHTML = notes[user.email]
+        ? notes[user.email]
+              .map((note, index) => `
+                <li>
+                    <div>${note}</div>
+                    <button onclick="deleteNote(${index})">Delete</button>
+                </li>
+              `)
+              .join("")
+        : "No notes yet.";
+}
+
+// Delete a note
+function deleteNote(index) {
+    notes[user.email].splice(index, 1);
+    localStorage.setItem("notes", JSON.stringify(notes));
+    showNotesSection();
 }

@@ -68,6 +68,37 @@
                 <!-- Flashcards will be listed here -->
             </ul>
         </section>
+
+        <!-- Notes Section -->
+        <section id="notes">
+            <h2>Notes</h2>
+            <div id="editor-toolbar">
+                <select id="font-selector">
+                    <option value="Arial">Arial</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Georgia">Georgia</option>
+                </select>
+                <select id="font-size-selector">
+                    <option value="12px">12px</option>
+                    <option value="14px">14px</option>
+                    <option value="16px">16px</option>
+                    <option value="18px">18px</option>
+                    <option value="20px">20px</option>
+                </select>
+                <button onclick="toggleBold()">Bold</button>
+                <button onclick="toggleItalic()">Italic</button>
+                <button onclick="toggleBulletList()">Bullets</button>
+            </div>
+            <div id="rich-editor" contenteditable="true" style="border: 1px solid #ccc; padding: 10px; min-height: 100px;">
+                <!-- User's note will go here -->
+            </div>
+            <button onclick="saveFormattedNote()">Save Note</button>
+            <ul id="notes-list">
+                <!-- Saved notes will appear here -->
+            </ul>
+        </section>
+
     </div>
 
     <script src="js/app.js"></script>

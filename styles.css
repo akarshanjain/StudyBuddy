@@ -56,3 +56,20 @@ button:hover {
 #signup-page {
     display: none;
 }
+
+#editor-toolbar {
+    margin-bottom: 10px;
+}
+
+#editor-toolbar select, 
+#editor-toolbar button {
+    margin-right: 5px;
+}
+
+#rich-editor {
+    border: 1px solid #ccc;
+    padding: 10px;
+    min-height: 100px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
