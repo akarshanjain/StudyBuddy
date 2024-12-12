@@ -98,6 +98,7 @@ function showPage(pageId) {
     
     if (pageId === "dashboard-page") {
         renderMiniCalendar(); // Render the mini calendar for the dashboard
+        fetchJoke();
     }
 
     localStorage.setItem("currentPage", pageId); // Save the current page to localStorage
@@ -699,3 +700,26 @@ function renderAuthButton() {
         }
     };
 }
+
+// Function to fetch a random joke from JokeAPI
+function fetchJoke() {
+    fetch('https://v2.jokeapi.dev/joke/Any')
+        .then(response => response.json())
+        .then(data => {
+            // Check the type of the joke (single or two-part)
+            if (data.type === 'single') {
+                document.getElementById('joke-text').textContent = `"${data.joke}"`;
+            } else {
+                document.getElementById('joke-text').textContent = `"${data.setup}"`;
+                document.getElementById('joke-author').textContent = `"${data.delivery}"`;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching joke:', error);
+            document.getElementById('joke-text').textContent = "Failed to load joke.";
+            document.getElementById('joke-author').textContent = "- API Error";
+        });
+}
+
+// Call the function when the page loads
+document.addEventListener('DOMContentLoaded', fetchJoke);
