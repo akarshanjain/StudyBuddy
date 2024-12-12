@@ -645,38 +645,66 @@ function saveNoteWithTitle() {
 
 function renderNotesList() {
     const notesList = document.getElementById("notes-list");
-    const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
 
-    if (!loggedInUser) {
-        notesList.innerHTML = '<li>No saved notes</li>';
-        return;
-    }
+    // Clear existing notes
+    notesList.innerHTML = "";
 
+    // Handle empty notes case
     if (notes.length === 0) {
-        notesList.innerHTML = '<li>No saved notes</li>';
+        notesList.innerHTML = '<li class="list-group-item">No saved notes</li>';
         return;
     }
 
-    // Dynamically generate the list of saved notes with a delete button
-    notesList.innerHTML = notes.map((note, index) => `
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span onclick="loadNote(${index})" style="cursor: pointer;">${note.title}</span>
-            <button class="btn btn-danger btn-sm" onclick="deleteNote(${index})">&times;</button>
-        </li>
-    `).join('');
+    // Create a list item for each note
+    notes.forEach((note, index) => {
+        const listItem = document.createElement("li");
+        listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+
+        // Add the note title
+        const noteTitle = document.createElement("span");
+        noteTitle.textContent = note.title;
+        noteTitle.style.cursor = "pointer";
+        noteTitle.style.textDecoration = "underline";
+        noteTitle.onclick = () => loadNote(index); // Call loadNote on click
+
+        // Add a delete button
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "btn btn-danger btn-sm";
+        deleteButton.textContent = "×";
+        deleteButton.onclick = () => deleteNote(index); // Call deleteNote on click
+
+        // Append title and delete button to the list item
+        listItem.appendChild(noteTitle);
+        listItem.appendChild(deleteButton);
+
+        // Add the list item to the notes list
+        notesList.appendChild(listItem);
+    });
 }
 
 
 
 function loadNote(index) {
     const note = notes[index];
+
+    // Update the note content in the textarea
     document.getElementById("notes-text").value = note.content;
+
+    // Apply the note's font and size styles
     document.getElementById("font-select").value = note.styles.font;
     document.getElementById("font-size-select").value = note.styles.size;
     document.getElementById("notes-text").style.fontFamily = note.styles.font;
     document.getElementById("notes-text").style.fontSize = note.styles.size;
+
+    // Update the title display
+    const noteTitleDisplay = document.getElementById("note-title-display").querySelector('h3');
+    noteTitleDisplay.textContent = `Title: ${note.title}`;
+
+    // Set the current note to the selected note
     currentNote = { ...note };
 }
+
+
 
 function deleteNote(index) {
     // Remove the note from the notes array
