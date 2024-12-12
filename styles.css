@@ -304,3 +304,19 @@ body {
 .fc-daygrid-day {
     cursor: pointer; /* Change cursor to pointer on hover */
 }
+
+#googleCalendarConnect {
+    width: auto;
+    margin-right: 10px; /* Adds spacing between buttons */
+    height: 40px; /* Set a consistent height */
+}
+
+#addEventButton {
+    width: 40px; /* Set button width to make it square */
+    height: 40px; /* Matches the height of the connect button */
+    display: flex; /* Centers the '+' inside the button */
+    justify-content: center;
+    align-items: center;
+    margin-left: auto; /* Pushes the '+' button to the far right */
+}
+
