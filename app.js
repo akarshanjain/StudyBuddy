@@ -95,6 +95,7 @@ function showPage(pageId) {
 
 
 
+
 function updatePageTitle(title) {
     const pageTitle = document.getElementById("page-title");
     pageTitle.innerText = title.charAt(0).toUpperCase() + title.slice(1);
@@ -136,17 +137,22 @@ function renderTodoList() {
 }
 
 function renderTodoListTab() {
-    const todoListTab = document.getElementById("todo-list-page");
-    todoListTab.innerHTML = todoList.map(todo => `
+    const todoListTabContainer = document.getElementById("todo-list-tab-container");
+    todoListTabContainer.innerHTML = todoList.map((todo, index) => `
         <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">To-Do Item: ${todo.text}</h5>
-                <p class="card-text"><strong>Priority:</strong> ${todo.priority}</p>
-                <p class="card-text"><strong>Description:</strong> ${todo.description}</p>
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title">To-Do Item: ${todo.text}</h5>
+                    <p class="card-text"><strong>Priority:</strong> ${todo.priority}</p>
+                    <p class="card-text"><strong>Description:</strong> ${todo.description || "No description provided"}</p>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="removeTodoItem(${index})">&times;</button>
             </div>
         </div>
     `).join('') || '<p>No to-do items</p>';
 }
+
+
 
 
 
@@ -187,24 +193,34 @@ function addTodoItemFromModal() {
     // Save to localStorage
     localStorage.setItem("todoList", JSON.stringify(todoList));
 
-    // Re-render the to-do list
+    // Re-render the to-do list on both the dashboard and the tab
     renderTodoList();
+    renderTodoListTab();
 
     // Close the modal
     $('#todoModal').modal('hide');
 }
 
 
+// listener for the + button in the to do list tab
+document.getElementById("add-todo-btn-tab").addEventListener("click", addTodoItem);
 
 
 document.getElementById("add-todo-btn").addEventListener("click", addTodoItem);
 
-// Remove To-Do Item
 function removeTodoItem(index) {
+    // Remove the item from the to-do list
     todoList.splice(index, 1);
+
+    // Save the updated list to localStorage
     localStorage.setItem("todoList", JSON.stringify(todoList));
+
+    // Re-render the to-do list on both the dashboard and the tab
     renderTodoList();
+    renderTodoListTab();
 }
+
+
 
 // Logout User
 function logoutUser() {
