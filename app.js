@@ -101,6 +101,7 @@ function showPage(pageId) {
     }
 
     localStorage.setItem("currentPage", pageId); // Save the current page to localStorage
+    
     updatePageTitle(pageId.replace('-page', '').replace(/-/g, ' '));
 }
 
@@ -108,6 +109,10 @@ function showPage(pageId) {
 
 
 function updatePageTitle(title) {
+    if (title === "todo list") {
+        title = "To-Do List";
+    }
+
     const pageTitle = document.getElementById("page-title");
     pageTitle.innerText = title.charAt(0).toUpperCase() + title.slice(1);
 }
@@ -115,7 +120,7 @@ function updatePageTitle(title) {
 // Render Dashboard
 function renderDashboard() {
     renderDeadlines();
-    renderCalendar();
+    renderMiniCalendar();
     renderTodoList();
 }
 
@@ -131,121 +136,95 @@ function renderDeadlines() {
     `).join('') || '<li class="list-group-item">No upcoming deadlines</li>';
 }
 
-function renderCalendar() {
-    const calendarDiv = document.getElementById("dashboard-calendar");
-    const today = new Date();
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
-    let calendarHtml = "<table class='calendar-grid'><tr>";
-    for (let day = monthStart.getDate(); day <= monthEnd.getDate(); day++) {
-        const currentDate = new Date(today.getFullYear(), today.getMonth(), day);
-        const events = googleCalendarEvents.filter((event) =>
-            event.start.dateTime
-                ? new Date(event.start.dateTime).toDateString() === currentDate.toDateString()
-                : new Date(event.start.date).toDateString() === currentDate.toDateString()
-        );
-
-        calendarHtml += `
-            <td>
-                <div>${currentDate.toDateString()}</div>
-                <ul>
-                    ${events.map((event) => `<li>${event.summary}</li>`).join("")}
-                </ul>
-            </td>
-        `;
-
-        if (currentDate.getDay() === 6) calendarHtml += "</tr><tr>"; // Start a new row for each week
-    }
-    calendarHtml += "</tr></table>";
-
-    calendarDiv.innerHTML = calendarHtml;
-}
-
 function renderFullCalendar() {
-    const calendarEl = document.getElementById("full-calendar");
+    const fullCalendarEl = document.getElementById("full-calendar");
 
-    // Retrieve saved events from localStorage
-    const savedEvents = JSON.parse(localStorage.getItem("savedCalendarEvents")) || [];
-
-    const calendar = new FullCalendar.Calendar(calendarEl, {
+    const fullCalendar = new FullCalendar.Calendar(fullCalendarEl, {
         initialView: "dayGridMonth",
-        editable: true, // Allow events to be draggable
-        selectable: true, // Allow creating events by clicking
-        events: savedEvents, // Load saved events
+        height: "auto", // Automatically adjust height to remove extra weeks
+        editable: true,
+        selectable: true,
+        events: googleCalendarEvents.map(event => ({
+            title: event.summary,
+            start: event.start.dateTime || event.start.date,
+            end: event.end.dateTime || event.end.date,
+        })),
         headerToolbar: {
             left: "prev,next today",
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
         },
+        fixedWeekCount: false,
         dateClick: function (info) {
-            selectedDate = info.dateStr; // Store the clicked date
-            document.getElementById("eventTitleInput").value = ""; // Reset the input field
-            $('#eventTitleModal').modal('show'); // Show the modal
-        },
-        eventContent: function (arg) {
-            // Create a custom event element with a delete button
-            const eventEl = document.createElement("div");
-            eventEl.className = "fc-event-main";
-
-            // Event title
-            const titleEl = document.createElement("span");
-            titleEl.textContent = arg.event.title;
-
-            // Delete button
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "×";
-            deleteButton.className = "delete-button";
-            deleteButton.onclick = (e) => {
-                e.stopPropagation(); // Prevent triggering the event click
-                arg.event.remove(); // Remove the event from the calendar
-                deleteEvent(arg.event.id); // Remove the event from localStorage
-            };
-
-            // Append the title and delete button to the event
-            eventEl.appendChild(titleEl);
-            eventEl.appendChild(deleteButton);
-
-            return { domNodes: [eventEl] };
+            const clickedDate = new Date(info.dateStr);
+            showAddEventModal(clickedDate);
         },
     });
 
-    calendar.render();
+    fullCalendar.render();
 }
 
-function addEventToCalendar() {
-    const eventTitle = document.getElementById("eventTitleInput").value.trim();
+document.getElementById("addEventForm").addEventListener("submit", function (event) {
+    event.preventDefault();
 
-    if (!eventTitle) {
-        alert("Event title cannot be empty."); // Optional validation
-        return;
+    const day = document.getElementById("eventDay").value;
+    const month = document.getElementById("eventMonth").value - 1;
+    const year = document.getElementById("eventYear").value;
+    const title = document.getElementById("eventTitle").value;
+    const description = document.getElementById("eventDescription").value;
+
+    const eventDate = new Date(year, month, day).toISOString();
+
+    fullCalendarInstance.addEvent({
+        title,
+        start: eventDate,
+        extendedProps: {
+            description,
+        },
+    });
+
+    saveEvent({ title, start: eventDate, description });
+    $('#addEventModal').modal('hide');
+});
+
+function showAddEventModal(date = new Date()) {
+    // Autofill the dropdowns with the given or current date
+    populateDateDropdowns(date);
+
+    // Show the modal
+    $('#addEventModal').modal('show');
+}
+
+function populateDateDropdowns(date) {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const daySelect = document.getElementById("eventDay");
+    daySelect.innerHTML = "";
+    for (let i = 1; i <= 31; i++) {
+        daySelect.innerHTML += `<option value="${i}" ${i === day ? "selected" : ""}>${i}</option>`;
     }
 
-    const newEvent = {
-        id: Date.now().toString(), // Unique ID for the event
-        title: eventTitle,
-        start: selectedDate, // Use the globally stored selected date
-    };
+    const monthSelect = document.getElementById("eventMonth");
+    monthSelect.innerHTML = "";
+    for (let i = 1; i <= 12; i++) {
+        monthSelect.innerHTML += `<option value="${i}" ${i === month ? "selected" : ""}>${i}</option>`;
+    }
 
-    // Access the calendar instance and add the event
-    const calendarEl = document.getElementById("full-calendar");
-    const calendar = FullCalendar.getCalendar(calendarEl); // Get the calendar instance
-    calendar.addEvent(newEvent); // Add the event to the calendar
-
-    // Save the event to localStorage
-    saveEvent(newEvent);
-
-    // Close the modal
-    $('#eventTitleModal').modal('hide');
+    const yearSelect = document.getElementById("eventYear");
+    yearSelect.innerHTML = "";
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+        yearSelect.innerHTML += `<option value="${i}" ${i === year ? "selected" : ""}>${i}</option>`;
+    }
 }
-
-
 
 
 function saveEvent(event) {
     const savedEvents = JSON.parse(localStorage.getItem("savedCalendarEvents")) || [];
-    savedEvents.push(event); // Add new event to the list
-    localStorage.setItem("savedCalendarEvents", JSON.stringify(savedEvents)); // Save back to localStorage
+    savedEvents.push(event);
+    localStorage.setItem("savedCalendarEvents", JSON.stringify(savedEvents));
 }
 
 function deleteEvent(eventId) {
@@ -284,22 +263,29 @@ function renderTodoListTab() {
 }
 
 function renderMiniCalendar() {
-    const calendarEl = document.getElementById("dashboard-calendar");
+    const miniCalendarEl = document.getElementById("dashboard-mini-calendar");
 
-    const calendar = new FullCalendar.Calendar(calendarEl, {
+    // Remove existing instance if already rendered
+    if (miniCalendarEl.fullCalendar) miniCalendarEl.fullCalendar.destroy();
+
+    const miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
         initialView: "dayGridMonth",
-        headerToolbar: false, // Disable toolbar for mini version
-        height: "auto",       // Automatically adjust height
-        aspectRatio: 1,       // Adjust ratio for a smaller display
-        events: googleCalendarEvents.map((event) => ({
+        events: googleCalendarEvents.map(event => ({
             title: event.summary,
             start: event.start.dateTime || event.start.date,
             end: event.end.dateTime || event.end.date,
         })),
+        headerToolbar: {
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay",
+        },
+        fixedWeekCount: false,
     });
 
-    calendar.render();
+    miniCalendar.render();
 }
+
 
 
 
@@ -458,7 +444,13 @@ function fetchGoogleCalendarEvents() {
         })
         .then((response) => {
             googleCalendarEvents = response.result.items;
-            renderCalendar();
+            if (pageId === 'calendar-page') {
+                renderFullCalendar(); // Render FullCalendar when the "Calendar" tab is shown
+            }
+            
+            if (pageId === "dashboard-page") {
+                renderMiniCalendar(); // Render the mini calendar for the dashboard
+            }
         })
         .catch((err) => console.error("Error fetching calendar events:", err));
 }
@@ -471,12 +463,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (savedUser) {
         // If a user session exists
+        document.getElementById("login-page").style.display = "none";
+        document.getElementById("signup-page").style.display = "none";
         user = JSON.parse(savedUser); // Retrieve and assign the logged-in user
         document.getElementById("main-navbar").style.display = "flex"; // Show navbar
         document.getElementById("page-title-container").style.display = "flex"; // Show title
         showPage(savedPage); // Redirect to the last visited page
-        document.getElementById("login-page").style.display = "none";
-        document.getElementById("signup-page").style.display = "none";
     } else {
         // No logged-in user; redirect to login page
         document.getElementById("main-navbar").style.display = "none"; // Hide navbar
