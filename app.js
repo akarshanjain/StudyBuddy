@@ -98,6 +98,7 @@ function showPage(pageId) {
     
     if (pageId === "dashboard-page") {
         renderMiniCalendar(); // Render the mini calendar for the dashboard
+        renderDeadlines();
         fetchJoke();
     }
 
@@ -120,9 +121,9 @@ function updatePageTitle(title) {
 
 // Render Dashboard
 function renderDashboard() {
-    renderDeadlines();
     renderMiniCalendar();
     renderTodoList();
+    renderDeadlines();
 }
 
 // Render Upcoming Deadlines
@@ -462,8 +463,12 @@ function logoutUser() {
 
 // Show Edit Profile Page
 function showEditProfile() {
+    const pages = document.querySelectorAll('.page, .loginpage');
+    pages.forEach(page => page.style.display = 'none');
+
     document.getElementById("dashboard-page").style.display = "none";
     document.getElementById("edit-profile-page").style.display = "block";
+    
     const savedUser = JSON.parse(localStorage.getItem("loggedInUser"));
     if (savedUser) {
         const nameField = document.getElementById("edit-name");
