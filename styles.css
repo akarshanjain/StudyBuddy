@@ -278,6 +278,19 @@ body {
     display: none; /* Hide toolbar (e.g., navigation buttons) */
 }
 
+.fc-daygrid-event {
+    width: 100%; /* Make the event span the full width of the date cell */
+    box-sizing: border-box; /* Include padding/border in width calculation */
+    overflow: hidden; /* Prevent content from spilling over */
+    white-space: nowrap; /* Keep event text on one line */
+    text-overflow: ellipsis; /* Truncate text with ellipsis if too long */
+}
+
+.fc-daygrid-event:hover {
+    overflow: visible; /* Show full content on hover */
+    white-space: normal; /* Allow wrapping on hover */
+}
+
 /* Style for the event delete button */
 .fc-event-main {
     display: flex;
@@ -318,5 +331,27 @@ body {
     justify-content: center;
     align-items: center;
     margin-left: auto; /* Pushes the '+' button to the far right */
+}
+
+/* Align labels and dropdowns better */
+#addEventModal .form-group .form-label {
+    display: block;
+    text-align: center;
+    margin-bottom: 5px;
+    width: "100%";
+}
+
+#addEventModal .form-group select {
+    width: 100px; /* Ensure all dropdowns are the same width */
+    text-align-last: center; /* Center align the dropdown text */
+}
+
+/* Adjust spacing between dropdowns */
+#addEventModal .d-flex > div {
+    margin-right: 10px; /* Space between Month and Day */
+}
+
+#addEventModal .d-flex > div:last-child {
+    margin-right: 0; /* Remove margin for the last element */
 }
 
