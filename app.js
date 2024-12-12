@@ -67,3 +67,52 @@ function showPage(pageId) {
     });
     document.getElementById(pageId).style.display = 'block';
 }
+
+// Google Calendar API initialization
+function initializeGoogleCalendar() {
+    gapi.load('client:auth2', () => {
+        gapi.client.init({
+            clientId: "153359750619-bp3fg1877mjpg7rafo9dprmt66epehe0.apps.googleusercontent.com",
+            discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+            scope: "https://www.googleapis.com/auth/calendar.readonly"
+        }).then(() => {
+            // Check if the user is already signed in
+            if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+                fetchGoogleCalendarEvents();
+            }
+        });
+    });
+}
+
+// Fetch Google Calendar events
+function fetchGoogleCalendarEvents() {
+    gapi.client.calendar.events.list({
+        'calendarId': 'primary',
+        'timeMin': (new Date()).toISOString(),
+        'showDeleted': false,
+        'singleEvents': true,
+        'maxResults': 10,
+        'orderBy': 'startTime'
+    }).then((response) => {
+        googleCalendarEvents = response.result.items;
+        displayCalendarEvents();
+    });
+}
+
+// Display calendar events
+function displayCalendarEvents() {
+    const eventList = document.getElementById('event-list');
+    eventList.innerHTML = googleCalendarEvents.map(event => `
+        <div class="calendar-event">
+            <strong>${event.summary}</strong>
+            <p>Date: ${new Date(event.start.dateTime || event.start.date).toLocaleString()}</p>
+        </div>
+    `).join('') || 'No upcoming events';
+}
+
+// Add a login with Google button in login page
+function handleGoogleSignIn() {
+    gapi.auth2.getAuthInstance().signIn().then(() => {
+        fetchGoogleCalendarEvents();
+    });
+}
