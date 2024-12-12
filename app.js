@@ -352,13 +352,24 @@ function createNewNote() {
 
 function saveNote() {
     const noteContent = document.getElementById("notes-text").value;
+
     if (!noteContent.trim()) {
         alert("Cannot save an empty note.");
         return;
     }
-    const noteTitle = prompt("Enter a title for your note:");
+
+    // Open the modal for entering the note title
+    document.getElementById("noteTitleInput").value = ""; // Reset the input field
+    $('#noteTitleModal').modal('show');
+}
+
+
+function saveNoteWithTitle() {
+    const noteTitle = document.getElementById("noteTitleInput").value.trim();
+    const noteContent = document.getElementById("notes-text").value;
+
     if (!noteTitle) {
-        alert("Title is required to save the note.");
+        alert("Title is required to save the note."); // Optional fallback if empty
         return;
     }
 
@@ -383,8 +394,13 @@ function saveNote() {
     // Re-render the notes list
     renderNotesList();
 
-    alert("Note saved successfully!");
+    // Close the modal
+    $('#noteTitleModal').modal('hide');
+
+    // Optionally notify the user (e.g., with a non-intrusive toast)
+    console.log("Note saved successfully!");
 }
+
 
 
 function renderNotesList() {
@@ -423,11 +439,6 @@ function loadNote(index) {
 }
 
 function deleteNote(index) {
-    // Confirm deletion
-    if (!confirm("Are you sure you want to delete this note?")) {
-        return;
-    }
-
     // Remove the note from the notes array
     notes.splice(index, 1);
 
@@ -442,9 +453,8 @@ function deleteNote(index) {
 
     // Re-render the notes list
     renderNotesList();
-
-    alert("Note deleted successfully!");
 }
+
 
 
 function toggleBold() {
