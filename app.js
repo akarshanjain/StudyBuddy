@@ -1,258 +1,127 @@
-let user = null; // Stores the current user data
-let users = JSON.parse(localStorage.getItem("users")) || []; // Mock users database
-let googleCalendarEvents = [];
-let todoList = JSON.parse(localStorage.getItem("todoList")) || []; // To-Do list items
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Buddy Digital Assistant</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+</head>
+<body>
 
-function toggleLoginSignUp() {
-    document.getElementById("login-page").style.display = "none";
-    document.getElementById("signup-page").style.display = "block";
-}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" id="main-navbar" style="display: none;">
+        <a class="navbar-brand" href="javascript:void(0)" onclick="showDashboard()">Study Buddy</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('dashboard-page')">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('calendar-page')">Calendar</a></li>
+                <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('todo-list-page')">To-Do List</a></li>
+                <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('notes-page')">Notes</a></li>
+                <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('flashcards-page')">Flashcards</a></li>
+                <!-- Profile Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Profile</a>
+                    <div class="dropdown-menu" aria-labelledby="profileDropdown">
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="showEditProfile()">Edit Profile</a>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="logoutUser()">Logout</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-function toggleSignUpLogin() {
-    document.getElementById("signup-page").style.display = "none";
-    document.getElementById("login-page").style.display = "block";
-}
+    <!-- Page Title -->
+    <div id="page-title-container" class="text-center my-3" style="display: none;">
+        <h2 id="page-title"></h2>
+    </div>
 
-// Handle sign-up form submission
-document.getElementById("signup-form").addEventListener("submit", function (event) {
-    event.preventDefault();
-    const name = document.getElementById("signup-name").value;
-    const email = document.getElementById("signup-email").value;
-    const password = document.getElementById("signup-password").value;
+    <!-- Login Page -->
+    <div id="login-page" class="loginpage">
+        <h1>Welcome to Study Buddy</h1>
+        <form id="login-form">
+            <input type="email" id="email" placeholder="Email" required class="form-control mb-2"><br>
+            <input type="password" id="password" placeholder="Password" required class="form-control mb-2"><br>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <p>Don't have an account? <a href="javascript:void(0)" onclick="toggleLoginSignUp()">Sign Up</a></p>
+    </div>
 
-    // Check if the email is already registered
-    const existingUser = users.find(user => user.email === email);
-    if (existingUser) {
-        alert("Email is already registered. Please log in.");
-        toggleSignUpLogin(); // Redirect to login page
-        return;
-    }
+    <!-- Sign-Up Page -->
+    <div id="signup-page" class="loginpage" style="display: none;">
+        <h1>Create a New Account</h1>
+        <form id="signup-form">
+            <input type="text" id="signup-name" placeholder="Full Name" required class="form-control mb-2"><br>
+            <input type="email" id="signup-email" placeholder="Email" required class="form-control mb-2"><br>
+            <input type="password" id="signup-password" placeholder="Password" required class="form-control mb-2"><br>
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="javascript:void(0)" onclick="toggleSignUpLogin()">Login</a></p>
+    </div>
 
-    // Save the new user
-    users.push({ name, email, password });
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("Account created successfully! Please log in.");
-    toggleSignUpLogin(); // Redirect to login page
-});
+    <!-- Edit Profile Page -->
+    <div id="edit-profile-page" class="page" style="display: none;">
+        <form id="edit-profile-form">
+            <label for="edit-name" class="form-label">Edit Username</label>
+            <input type="text" id="edit-name" placeholder="Full Name" required class="form-control mb-2"><br>
+            <label for="edit-email" class="form-label">Edit Email</label>
+            <input type="email" id="edit-email" placeholder="Email" required class="form-control mb-2"><br>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
 
-// Handle login form submission
-document.getElementById("login-form").addEventListener("submit", function (event) {
-    event.preventDefault();
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    loginUser(email, password);
-});
+    <!-- Main Dashboard Page -->
+    <div id="dashboard-page" class="page" style="display: none;">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Upcoming Deadlines -->
+                <div class="col-md-3">
+                    <div class="card p-3 shadow h-100">
+                        <h4>Upcoming Deadlines</h4>
+                        <ul id="upcoming-deadlines" class="list-group">
+                            <li class="list-group-item">No upcoming deadlines</li>
+                        </ul>
+                    </div>
+                </div>
 
-// Simulate a login function
-function loginUser(email, password) {
-    const userData = users.find(user => user.email === email && user.password === password);
-    if (userData) {
-        user = userData;
-        sessionStorage.setItem("loggedInUser", JSON.stringify(user)); // Save session
-        document.getElementById("login-page").style.display = "none";
-        document.getElementById("signup-page").style.display = "none";
-        showDashboard();
-    } else {
-        alert("Invalid credentials");
-    }
-}
+                <!-- Calendar Integration -->
+                <div class="col-md-6">
+                    <div class="card p-3 shadow h-100">
+                        <h4>Calendar</h4>
+                        <div id="dashboard-calendar" class="calendar">
+                            <p>Google Calendar events will appear here.</p>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- To-Do List -->
+                <div class="col-md-3">
+                    <div class="card p-3 shadow h-100">
+                        <h4>To-Do List</h4>
+                        <ul id="todo-list" class="list-group">
+                            <li class="list-group-item">No to-do items</li>
+                        </ul>
+                        <button class="btn btn-primary mt-2 w-100" id="add-todo-btn">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-// Show Dashboard
-function showDashboard() {
-    document.getElementById("login-page").style.display = "none";
-    document.getElementById("signup-page").style.display = "none";
-    document.getElementById("main-navbar").style.display = "flex"; // Show navbar
-    document.getElementById("page-title-container").style.display = "flex"; // Show page title
-    showPage('dashboard-page'); // Show default page after login
-    renderDashboard();
-    updatePageTitle("Dashboard");
-}
+    <!-- Other Pages -->
+    <div id="calendar-page" class="page" style="display: none;">Calendar Page</div>
+    <div id="todo-list-page" class="page" style="display: none;">To-Do List Page</div>
+    <div id="notes-page" class="page" style="display: none;">Notes Page</div>
+    <div id="flashcards-page" class="page" style="display: none;">Flashcards Page</div>
 
-function showPage(pageId) {
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => {
-        page.style.display = 'none';
-    });
-    document.getElementById(pageId).style.display = 'block';
-    localStorage.setItem("currentPage", pageId); // Save the current page to localStorage
-    updatePageTitle(pageId.replace('-page', '').replace(/-/g, ' '));
-}
-
-
-function updatePageTitle(title) {
-    const pageTitle = document.getElementById("page-title");
-    pageTitle.innerText = title.charAt(0).toUpperCase() + title.slice(1);
-}
-
-// Render Dashboard
-function renderDashboard() {
-    renderDeadlines();
-    renderCalendar();
-    renderTodoList();
-}
-
-// Render Upcoming Deadlines
-function renderDeadlines() {
-    const upcomingDeadlines = googleCalendarEvents.slice(0, 5);
-    const deadlinesList = document.getElementById("upcoming-deadlines");
-    deadlinesList.innerHTML = upcomingDeadlines.map(event => `
-        <li class="list-group-item">
-            <strong>${event.summary}</strong><br>
-            ${new Date(event.start.dateTime || event.start.date).toLocaleString()}
-        </li>
-    `).join('') || '<li class="list-group-item">No upcoming deadlines</li>';
-}
-
-// Render Calendar
-function renderCalendar() {
-    const calendarDiv = document.getElementById("dashboard-calendar");
-    calendarDiv.innerHTML = "<p>Google Calendar events will appear here.</p>";
-}
-
-// Render To-Do List
-function renderTodoList() {
-    const todoListElement = document.getElementById("todo-list");
-    todoListElement.innerHTML = todoList.map((todo, index) => `
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            ${todo.text}
-            <button class="btn btn-danger btn-sm" onclick="removeTodoItem(${index})">&times;</button>
-        </li>
-    `).join('') || '<li class="list-group-item">No to-do items</li>';
-}
-
-// Add To-Do Item
-function addTodoItem() {
-    const newItemText = prompt("Enter a new to-do item:");
-    if (newItemText) {
-        todoList.push({ text: newItemText });
-        localStorage.setItem("todoList", JSON.stringify(todoList));
-        renderTodoList();
-    }
-}
-
-document.getElementById("add-todo-btn").addEventListener("click", addTodoItem);
-
-// Remove To-Do Item
-function removeTodoItem(index) {
-    todoList.splice(index, 1);
-    localStorage.setItem("todoList", JSON.stringify(todoList));
-    renderTodoList();
-}
-
-// Logout User
-function logoutUser() {
-    sessionStorage.removeItem("loggedInUser"); // Clear sessionStorage
-    localStorage.removeItem("currentPage"); // Clear the saved page
-    user = null;
-    document.getElementById("main-navbar").style.display = "none"; // Hide navbar
-    document.getElementById("page-title-container").style.display = "none"; // Hide title
-    showPage("login-page"); // Redirect to login page
-}
-
-
-// Show Edit Profile Page
-function showEditProfile() {
-    document.getElementById("dashboard-page").style.display = "none";
-    document.getElementById("edit-profile-page").style.display = "block";
-    const savedUser = JSON.parse(localStorage.getItem("loggedInUser"));
-    if (savedUser) {
-        const nameField = document.getElementById("edit-name");
-        const emailField = document.getElementById("edit-email");
-
-        nameField.value = savedUser.name || "";
-        emailField.value = savedUser.email || "";
-
-        // Add the 'prefilled' class if fields are not empty
-        nameField.classList.toggle("prefilled", !!savedUser.name);
-        emailField.classList.toggle("prefilled", !!savedUser.email);
-    }
-    updatePageTitle("Edit Profile");
-}
-
-
-// Handle Profile Update
-document.getElementById("edit-profile-form").addEventListener("submit", function (event) {
-    event.preventDefault();
-    const newName = document.getElementById("edit-name").value;
-    const newEmail = document.getElementById("edit-email").value;
-
-    if (user) {
-        // Update user data
-        user.name = newName;
-        user.email = newEmail;
-
-        // Update users array
-        const userIndex = users.findIndex(u => u.email === user.email);
-        if (userIndex !== -1) {
-            users[userIndex] = { ...user, name: newName, email: newEmail };
-        }
-        localStorage.setItem("users", JSON.stringify(users)); // Save updated users
-        localStorage.setItem("loggedInUser", JSON.stringify(user)); // Save logged-in user
-        alert("Profile updated successfully!");
-        showDashboard();
-    }
-});
-
-// Google Calendar API initialization
-function initializeGoogleCalendar() {
-    gapi.load('client:auth2', () => {
-        gapi.client.init({
-            clientId: "153359750619-bp3fg1877mjpg7rafo9dprmt66epehe0.apps.googleusercontent.com",
-            discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
-            scope: "https://www.googleapis.com/auth/calendar.readonly"
-        }).then(() => {
-            // Check if the user is already signed in
-            if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-                fetchGoogleCalendarEvents();
-            }
-        });
-    });
-}
-
-// Fetch Google Calendar events
-function fetchGoogleCalendarEvents() {
-    gapi.client.calendar.events.list({
-        'calendarId': 'primary',
-        'timeMin': (new Date()).toISOString(),
-        'showDeleted': false,
-        'singleEvents': true,
-        'maxResults': 10,
-        'orderBy': 'startTime'
-    }).then((response) => {
-        googleCalendarEvents = response.result.items;
-        renderDeadlines();
-    });
-}
-
-// Check for logged-in user on page load
-document.addEventListener("DOMContentLoaded", () => {
-    const savedUser = sessionStorage.getItem("loggedInUser"); // Check sessionStorage for user
-    const savedPage = localStorage.getItem("currentPage") || "dashboard-page"; // Default to dashboard-page
-
-    if (savedUser) {
-        // If a user session exists
-        user = JSON.parse(savedUser); // Retrieve and assign the logged-in user
-        document.getElementById("main-navbar").style.display = "flex"; // Show navbar
-        document.getElementById("page-title-container").style.display = "flex"; // Show title
-        showPage(savedPage); // Redirect to the last visited page
-        document.getElementById("login-page").style.display = "none";
-        document.getElementById("signup-page").style.display = "none";
-    } else {
-        // No logged-in user; redirect to login page
-        document.getElementById("main-navbar").style.display = "none"; // Hide navbar
-        document.getElementById("page-title-container").style.display = "none"; // Hide title
-        showPage("login-page"); // Show login page
-    }
-});
-
-
-
-
-document.getElementById("edit-name").addEventListener("input", function () {
-    this.classList.remove("prefilled");
-});
-
-document.getElementById("edit-email").addEventListener("input", function () {
-    this.classList.remove("prefilled");
-});
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
