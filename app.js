@@ -177,7 +177,7 @@ function deleteNote(index) {
 function initializeGoogleCalendar() {
     gapi.load('client:auth2', () => {
         gapi.client.init({
-            clientId: '153359750619-bp3fg1877mjpg7rafo9dprmt66epehe0.apps.googleusercontent.com',
+            clientId: "153359750619-bp3fg1877mjpg7rafo9dprmt66epehe0.apps.googleusercontent.com",
             discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
             scope: "https://www.googleapis.com/auth/calendar.readonly"
         }).then(() => {
