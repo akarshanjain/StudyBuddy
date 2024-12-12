@@ -139,9 +139,9 @@ function renderDeadlines() {
 function renderFullCalendar() {
     const fullCalendarEl = document.getElementById("full-calendar");
 
-    const fullCalendar = new FullCalendar.Calendar(fullCalendarEl, {
+    fullCalendarInstance = new FullCalendar.Calendar(fullCalendarEl, {
         initialView: "dayGridMonth",
-        height: "auto", // Automatically adjust height to remove extra weeks
+        height: "auto",
         editable: true,
         selectable: true,
         events: googleCalendarEvents.map(event => ({
@@ -159,23 +159,60 @@ function renderFullCalendar() {
             const clickedDate = new Date(info.dateStr);
             showAddEventModal(clickedDate);
         },
+        eventContent: function (arg) {
+            let content = document.createElement("div");
+
+            let title = document.createElement("span");
+            title.textContent = arg.event.title;
+
+            let deleteButton = document.createElement("span");
+            deleteButton.textContent = "X";
+            deleteButton.classList.add("delete-event");
+            deleteButton.style.cursor = "pointer";
+            deleteButton.style.color = "red";
+            deleteButton.style.float = "right";
+            deleteButton.style.display = "none"; // Hidden by default
+
+            deleteButton.onclick = function () {
+                arg.event.remove();
+                deleteEvent(arg.event.id);
+            };
+
+            content.style.position = "relative";
+            content.style.padding = "5px";
+            content.style.border = "1px solid #ccc";
+
+            content.onmouseover = function () {
+                deleteButton.style.display = "block";
+            };
+
+            content.onmouseout = function () {
+                deleteButton.style.display = "none";
+            };
+
+            content.appendChild(title);
+            content.appendChild(deleteButton);
+
+            return { domNodes: [content] };
+        }
     });
 
-    fullCalendar.render();
+    fullCalendarInstance.render();
 }
 
 document.getElementById("addEventForm").addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const day = document.getElementById("eventDay").value;
-    const month = document.getElementById("eventMonth").value - 1;
-    const year = document.getElementById("eventYear").value;
+    const day = parseInt(document.getElementById("eventDay").value, 10);
+    const month = parseInt(document.getElementById("eventMonth").value, 10) - 1;
+    const year = parseInt(document.getElementById("eventYear").value, 10);
     const title = document.getElementById("eventTitle").value;
     const description = document.getElementById("eventDescription").value;
 
     const eventDate = new Date(year, month, day).toISOString();
 
     fullCalendarInstance.addEvent({
+        id: Date.now().toString(),
         title,
         start: eventDate,
         extendedProps: {
@@ -183,7 +220,7 @@ document.getElementById("addEventForm").addEventListener("submit", function (eve
         },
     });
 
-    saveEvent({ title, start: eventDate, description });
+    saveEvent({ id: Date.now().toString(), title, start: eventDate, description });
     $('#addEventModal').modal('hide');
 });
 
@@ -200,16 +237,16 @@ function populateDateDropdowns(date) {
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
-    const daySelect = document.getElementById("eventDay");
-    daySelect.innerHTML = "";
-    for (let i = 1; i <= 31; i++) {
-        daySelect.innerHTML += `<option value="${i}" ${i === day ? "selected" : ""}>${i}</option>`;
-    }
-
     const monthSelect = document.getElementById("eventMonth");
     monthSelect.innerHTML = "";
     for (let i = 1; i <= 12; i++) {
         monthSelect.innerHTML += `<option value="${i}" ${i === month ? "selected" : ""}>${i}</option>`;
+    }
+
+    const daySelect = document.getElementById("eventDay");
+    daySelect.innerHTML = "";
+    for (let i = 1; i <= 31; i++) {
+        daySelect.innerHTML += `<option value="${i}" ${i === day ? "selected" : ""}>${i}</option>`;
     }
 
     const yearSelect = document.getElementById("eventYear");
@@ -229,12 +266,9 @@ function saveEvent(event) {
 
 function deleteEvent(eventId) {
     const savedEvents = JSON.parse(localStorage.getItem("savedCalendarEvents")) || [];
-    const updatedEvents = savedEvents.filter(event => event.id !== eventId); // Remove the event
-    localStorage.setItem("savedCalendarEvents", JSON.stringify(updatedEvents)); // Save back to localStorage
+    const updatedEvents = savedEvents.filter(event => event.id !== eventId);
+    localStorage.setItem("savedCalendarEvents", JSON.stringify(updatedEvents));
 }
-
-
-
 
 function renderTodoList() {
     const todoListElement = document.getElementById("todo-list");
@@ -411,26 +445,26 @@ document.getElementById("edit-profile-form").addEventListener("submit", function
     }
 });
 
-// Google Calendar API initialization
 function initializeGoogleCalendar() {
-    gapi.load('client:auth2', () => {
-        gapi.client.init({
-            clientId: "153359750619-bp3fg1877mjpg7rafo9dprmt66epehe0.apps.googleusercontent.com",
-            discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
-            scope: "https://www.googleapis.com/auth/calendar.readonly"
-        }).then(() => {
-            // Check if the user is already signed in
-            if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-                fetchGoogleCalendarEvents();
-            }
-        });
+    gapi.load("client:auth2", () => {
+        gapi.client
+            .init({
+                clientId: "200624218255-uvid8skdebsb814dsrr6bi0lgt34c31k.apps.googleusercontent.com", // Replace with your actual client ID
+                discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+                scope: "https://www.googleapis.com/auth/calendar",
+            })
+            .then(() => {
+                gapi.auth2.getAuthInstance().signIn().then(() => {
+                    isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+                    fetchGoogleCalendarEvents();
+                });
+            });
     });
 }
 
-
 function fetchGoogleCalendarEvents() {
-    if (!isSignedIn || !gapiLoaded) {
-        console.log("Google API not ready or user not signed in.");
+    if (!isSignedIn) {
+        alert("Please sign in to Google first.");
         return;
     }
 
@@ -444,19 +478,14 @@ function fetchGoogleCalendarEvents() {
         })
         .then((response) => {
             googleCalendarEvents = response.result.items;
-            if (pageId === 'calendar-page') {
-                renderFullCalendar(); // Render FullCalendar when the "Calendar" tab is shown
-            }
-            
-            if (pageId === "dashboard-page") {
-                renderMiniCalendar(); // Render the mini calendar for the dashboard
-            }
+            renderFullCalendar(); // Refresh the calendar with fetched events
         })
-        .catch((err) => console.error("Error fetching calendar events:", err));
+        .catch((error) => console.error("Error fetching Google Calendar events:", error));
 }
 
 // Check for logged-in user on page load
 document.addEventListener("DOMContentLoaded", () => {
+    initializeGapi()
     renderNotesList();
     const savedUser = sessionStorage.getItem("loggedInUser"); // Check sessionStorage for user
     const savedPage = localStorage.getItem("currentPage") || "dashboard-page"; // Default to dashboard-page
@@ -636,15 +665,16 @@ function initializeGapi() {
     gapi.load("client:auth2", () => {
         gapi.client
             .init({
-                clientId: "YOUR_CLIENT_ID", // Replace with your Client ID
+                clientId: "200624218255-uvid8skdebsb814dsrr6bi0lgt34c31k.apps.googleusercontent.com", // Replace with actual Client ID
                 discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
                 scope: "https://www.googleapis.com/auth/calendar",
             })
             .then(() => {
                 gapiLoaded = true;
                 isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
-                renderAuthButton();
-            });
+                renderAuthButton(); // Update button based on sign-in status
+            })
+            .catch((error) => console.error("Error initializing Google API:", error));
     });
 }
 
@@ -652,18 +682,20 @@ function initializeGapi() {
 function renderAuthButton() {
     const authButton = document.getElementById("google-auth-btn");
     authButton.textContent = isSignedIn ? "Sign Out of Google" : "Sign In with Google";
-    authButton.style.display = "block";
 
     authButton.onclick = () => {
         if (isSignedIn) {
-            gapi.auth2.getAuthInstance().signOut();
-            isSignedIn = false;
+            gapi.auth2.getAuthInstance().signOut().then(() => {
+                isSignedIn = false;
+                renderAuthButton();
+                alert("Signed out from Google.");
+            });
         } else {
             gapi.auth2.getAuthInstance().signIn().then(() => {
                 isSignedIn = true;
                 fetchGoogleCalendarEvents();
+                renderAuthButton();
             });
         }
-        renderAuthButton();
     };
 }
