@@ -24,7 +24,14 @@
                 <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('todo-list-page')">To-Do List</a></li>
                 <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('notes-page')">Notes</a></li>
                 <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('flashcards-page')">Flashcards</a></li>
-                <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('profile-page')">Profile</a></li>
+                <!-- Profile Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Profile</a>
+                    <div class="dropdown-menu" aria-labelledby="profileDropdown">
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="showEditProfile()">Edit Profile</a>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="logoutUser()">Logout</a>
+                    </div>
+                </li>
             </ul>
         </div>
     </nav>
@@ -55,6 +62,17 @@
             <button type="submit" class="btn btn-primary">Sign Up</button>
         </form>
         <p>Already have an account? <a href="javascript:void(0)" onclick="toggleSignUpLogin()">Login</a></p>
+    </div>
+
+    <!-- Edit Profile Page -->
+    <div id="edit-profile-page" class="page" style="display: none;">
+        <form id="edit-profile-form">
+            <label for="edit-name" class="form-label">Edit Username</label>
+            <input type="text" id="edit-name" placeholder="Full Name" required class="form-control mb-2"><br>
+            <label for="edit-email" class="form-label">Edit Email</label>
+            <input type="email" id="edit-email" placeholder="Email" required class="form-control mb-2"><br>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
     </div>
 
     <!-- Main Dashboard Page -->
@@ -100,7 +118,6 @@
     <div id="todo-list-page" class="page" style="display: none;">To-Do List Page</div>
     <div id="notes-page" class="page" style="display: none;">Notes Page</div>
     <div id="flashcards-page" class="page" style="display: none;">Flashcards Page</div>
-    <div id="profile-page" class="page" style="display: none;">Profile Page</div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
