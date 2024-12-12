@@ -793,20 +793,16 @@ function renderAuthButton() {
 
 // Function to fetch a random joke from JokeAPI
 function fetchJoke() {
-    fetch('https://v2.jokeapi.dev/joke/Any')
+    fetch('https://official-joke-api.appspot.com/jokes/random')
         .then(response => response.json())
         .then(data => {
-            // Check the type of the joke (single or two-part)
-            if (data.type === 'single') {
-                document.getElementById('joke-text').textContent = `"${data.joke}"`;
-            } else {
-                document.getElementById('joke-text').textContent = `"${data.setup}"`;
-                document.getElementById('joke-author').textContent = `"${data.delivery}"`;
-            }
+            // Update the joke text and author
+            document.getElementById('joke-text').textContent = `${data.setup} - ${data.punchline}`;
+            document.getElementById('joke-author').textContent = "- Random Joke";
         })
         .catch(error => {
             console.error('Error fetching joke:', error);
-            document.getElementById('joke-text').textContent = "Failed to load joke.";
+            document.getElementById('joke-text').textContent = "Failed to load joke. Please try refreshing.";
             document.getElementById('joke-author').textContent = "- API Error";
         });
 }
