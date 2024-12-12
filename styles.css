@@ -228,3 +228,76 @@ body {
     resize: none;
 }
 
+#calendar-container {
+    width: 100%;
+    max-width: 1200px; /* Adjust as needed */
+    margin: 0 auto; /* Center the calendar horizontally */
+}
+
+#full-calendar {
+    width: 100%;
+    height: auto; /* Allow the calendar to scale */
+}
+
+@media (max-width: 768px) {
+    #calendar-container {
+        max-width: 100%; /* Use full width for smaller screens */
+        padding: 0 10px; /* Add padding for better spacing */
+    }
+}
+
+.page {
+    padding: 20px; /* Add spacing around the page content */
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 columns for days of the week */
+    grid-gap: 5px; /* Space between cells */
+}
+
+#dashboard-calendar {
+    max-width: 350px; /* Limit the width of the calendar */
+    margin: 0 auto;   /* Center the calendar in its container */
+    font-size: 12px;  /* Make the text smaller */
+}
+
+.calendar-mini .fc-toolbar-title {
+    font-size: 14px; /* Smaller title text */
+}
+
+.calendar-mini .fc-daygrid-day-number {
+    font-size: 10px; /* Smaller day numbers */
+}
+
+.calendar-mini .fc {
+    font-size: 12px; /* General smaller text for the mini calendar */
+}
+
+.calendar-mini .fc-header-toolbar {
+    display: none; /* Hide toolbar (e.g., navigation buttons) */
+}
+
+/* Style for the event delete button */
+.fc-event-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 4px;
+}
+
+.delete-button {
+    background: transparent;
+    border: none;
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    display: none; /* Hidden by default */
+    margin-left: 8px;
+}
+
+.fc-event-main:hover .delete-button {
+    display: inline; /* Show delete button on hover */
+}
+
