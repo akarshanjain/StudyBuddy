@@ -83,9 +83,16 @@ function showPage(pageId) {
         page.style.display = 'none';
     });
     document.getElementById(pageId).style.display = 'block';
+
+    // Call specific rendering functions for the To-Do List tab
+    if (pageId === 'todo-list-page') {
+        renderTodoListTab();
+    }
+
     localStorage.setItem("currentPage", pageId); // Save the current page to localStorage
     updatePageTitle(pageId.replace('-page', '').replace(/-/g, ' '));
 }
+
 
 
 function updatePageTitle(title) {
@@ -118,26 +125,77 @@ function renderCalendar() {
     calendarDiv.innerHTML = "<p>Google Calendar events will appear here.</p>";
 }
 
-// Render To-Do List
 function renderTodoList() {
     const todoListElement = document.getElementById("todo-list");
     todoListElement.innerHTML = todoList.map((todo, index) => `
         <li class="list-group-item d-flex justify-content-between align-items-center">
-            ${todo.text}
+            <span>${todo.text} : Priority ${todo.priority}</span>
             <button class="btn btn-danger btn-sm" onclick="removeTodoItem(${index})">&times;</button>
         </li>
     `).join('') || '<li class="list-group-item">No to-do items</li>';
 }
 
-// Add To-Do Item
-function addTodoItem() {
-    const newItemText = prompt("Enter a new to-do item:");
-    if (newItemText) {
-        todoList.push({ text: newItemText });
-        localStorage.setItem("todoList", JSON.stringify(todoList));
-        renderTodoList();
-    }
+function renderTodoListTab() {
+    const todoListTab = document.getElementById("todo-list-page");
+    todoListTab.innerHTML = todoList.map(todo => `
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">To-Do Item: ${todo.text}</h5>
+                <p class="card-text"><strong>Priority:</strong> ${todo.priority}</p>
+                <p class="card-text"><strong>Description:</strong> ${todo.description}</p>
+            </div>
+        </div>
+    `).join('') || '<p>No to-do items</p>';
 }
+
+
+
+
+function addTodoItem() {
+    document.getElementById("newTodoInput").value = "";
+    document.getElementById("priorityInput").value = ""; // Default to highest priority
+    document.getElementById("descriptionInput").value = ""; // Reset the description input
+    $('#todoModal').modal('show');
+}
+
+
+
+function addTodoItemFromModal() {
+    const newItemText = document.getElementById("newTodoInput").value.trim();
+    const priority = parseInt(document.getElementById("priorityInput").value);
+    const description = document.getElementById("descriptionInput").value.trim();
+
+    if (!newItemText) {
+        alert("To-Do item cannot be empty.");
+        return;
+    }
+
+    if (isNaN(priority) || priority < 1 || priority > 5) {
+        alert("Please select a valid priority between 1 and 5.");
+        return;
+    }
+
+    // If no description is provided, set it to a default value
+    const taskDescription = description || "No description provided";
+
+    // Add the new item to the to-do list
+    todoList.push({ text: newItemText, priority, description: taskDescription });
+
+    // Sort the to-do list by priority (lower numbers have higher priority)
+    todoList.sort((a, b) => a.priority - b.priority);
+
+    // Save to localStorage
+    localStorage.setItem("todoList", JSON.stringify(todoList));
+
+    // Re-render the to-do list
+    renderTodoList();
+
+    // Close the modal
+    $('#todoModal').modal('hide');
+}
+
+
+
 
 document.getElementById("add-todo-btn").addEventListener("click", addTodoItem);
 
