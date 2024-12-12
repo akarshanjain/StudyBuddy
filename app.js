@@ -127,15 +127,29 @@ function renderDashboard() {
 
 // Render Upcoming Deadlines
 function renderDeadlines() {
-    const upcomingDeadlines = googleCalendarEvents.slice(0, 5);
+    // Get all events from FullCalendar
+    const allEvents = fullCalendarInstance.getEvents();
+
+    // Filter events that are upcoming (current or future) and sort by closest date
+    const now = new Date();
+    const upcomingDeadlines = allEvents
+        .filter(event => new Date(event.start) >= now)
+        .sort((a, b) => new Date(a.start) - new Date(b.start))
+        .slice(0, 5); // Limit to the top 5 upcoming events
+
+    // Display sorted events in the deadlines section
     const deadlinesList = document.getElementById("upcoming-deadlines");
-    deadlinesList.innerHTML = upcomingDeadlines.map(event => `
-        <li class="list-group-item">
-            <strong>${event.summary}</strong><br>
-            ${new Date(event.start.dateTime || event.start.date).toLocaleString()}
-        </li>
-    `).join('') || '<li class="list-group-item">No upcoming deadlines</li>';
+    deadlinesList.innerHTML = upcomingDeadlines
+        .map(event => `
+            <li class="list-group-item">
+                <strong>${event.title}</strong><br>
+                ${new Date(event.start).toLocaleString()}<br>
+                ${event.extendedProps.description || ''}
+            </li>
+        `)
+        .join('') || '<li class="list-group-item">No upcoming deadlines</li>';
 }
+
 
 function renderFullCalendar() {
     const fullCalendarEl = document.getElementById("full-calendar");
@@ -151,16 +165,24 @@ function renderFullCalendar() {
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
         },
+        timeZone: "local",
         fixedWeekCount: false,
         dateClick: function (info) {
             const clickedDate = new Date(info.dateStr);
+
+            // Add 1 day to the clicked date
+            clickedDate.setDate(clickedDate.getDate() + 1);
+        
             showAddEventModal(clickedDate);
         },
         eventContent: function (arg) {
             let content = document.createElement("div");
+            content.style.width = "100%"; // Make event span full width
+            content.style.padding = "5px";
 
             let title = document.createElement("span");
             title.textContent = arg.event.title;
+            title.style.display = "block";
 
             let deleteButton = document.createElement("span");
             deleteButton.textContent = "X";
@@ -191,7 +213,22 @@ function renderFullCalendar() {
             content.appendChild(deleteButton);
 
             return { domNodes: [content] };
-        }
+        },
+        eventClick: function (info) {
+            const event = info.event;
+
+            // Populate modal with event details
+            document.getElementById("eventModalTitle").textContent = event.title;
+            document.getElementById("eventModalDescription").textContent = event.extendedProps.description || "No description provided.";
+            document.getElementById("deleteEventButton").onclick = function () {
+                event.remove(); // Remove event from calendar
+                deleteEvent(event.id); // Remove event from storage
+                $('#eventDetailsModal').modal('hide');
+            };
+
+            // Show modal
+            $('#eventDetailsModal').modal('show');
+        },
     });
 
     fullCalendarInstance.render();
@@ -244,18 +281,21 @@ function populateDateDropdowns(date) {
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
+    // Populate Month Dropdown
     const monthSelect = document.getElementById("eventMonth");
     monthSelect.innerHTML = "";
     for (let i = 1; i <= 12; i++) {
         monthSelect.innerHTML += `<option value="${i}" ${i === month ? "selected" : ""}>${i}</option>`;
     }
 
+    // Populate Day Dropdown
     const daySelect = document.getElementById("eventDay");
     daySelect.innerHTML = "";
     for (let i = 1; i <= 31; i++) {
         daySelect.innerHTML += `<option value="${i}" ${i === day ? "selected" : ""}>${i}</option>`;
     }
 
+    // Populate Year Dropdown
     const yearSelect = document.getElementById("eventYear");
     yearSelect.innerHTML = "";
     const currentYear = new Date().getFullYear();
@@ -265,10 +305,13 @@ function populateDateDropdowns(date) {
 }
 
 
+
+
 function saveEvent(event) {
     const savedEvents = JSON.parse(localStorage.getItem("savedCalendarEvents")) || [];
     savedEvents.push(event);
     localStorage.setItem("savedCalendarEvents", JSON.stringify(savedEvents)); // Save to localStorage
+    renderDeadlines();
 }
 
 
@@ -280,6 +323,7 @@ function deleteEvent(eventId) {
     // Refresh both calendars
     fullCalendarInstance.refetchEvents();
     renderMiniCalendar();
+    renderDeadlines();
 }
 
 
@@ -327,6 +371,7 @@ function renderMiniCalendar() {
         },
         selectable: false,
         editable: false,
+        fixedWeekCount: false,
     });
 
     miniCalendar.render();
