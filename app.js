@@ -327,11 +327,15 @@ function renderNotesList() {
         return;
     }
 
-    // Dynamically generate the list of saved notes
+    // Dynamically generate the list of saved notes with a delete button
     notesList.innerHTML = notes.map((note, index) => `
-        <li class="list-group-item" onclick="loadNote(${index})">${note.title}</li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span onclick="loadNote(${index})" style="cursor: pointer;">${note.title}</span>
+            <button class="btn btn-danger btn-sm" onclick="deleteNote(${index})">&times;</button>
+        </li>
     `).join('');
 }
+
 
 
 function loadNote(index) {
@@ -343,6 +347,31 @@ function loadNote(index) {
     document.getElementById("notes-text").style.fontSize = note.styles.size;
     currentNote = { ...note };
 }
+
+function deleteNote(index) {
+    // Confirm deletion
+    if (!confirm("Are you sure you want to delete this note?")) {
+        return;
+    }
+
+    // Remove the note from the notes array
+    notes.splice(index, 1);
+
+    // Update localStorage for the current user
+    const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
+    const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+
+    if (loggedInUser) {
+        allNotes[loggedInUser.email] = notes;
+        localStorage.setItem("notes", JSON.stringify(allNotes));
+    }
+
+    // Re-render the notes list
+    renderNotesList();
+
+    alert("Note deleted successfully!");
+}
+
 
 function toggleBold() {
     const textBox = document.getElementById("notes-text");
