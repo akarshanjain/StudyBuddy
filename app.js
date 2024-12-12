@@ -58,9 +58,11 @@ function loginUser(email, password) {
 function showDashboard() {
     document.getElementById("login-page").style.display = "none";
     document.getElementById("signup-page").style.display = "none";
-    document.getElementById("main-navbar").style.display = "block"; // Show navbar
+    document.getElementById("main-navbar").style.display = "flex"; // Show navbar
+    document.getElementById("page-title-container").style.display = "flex"; // Show page title
     showPage('dashboard-page'); // Show default page after login
     renderDashboard();
+    updatePageTitle("Dashboard");
 }
 
 function showPage(pageId) {
@@ -69,6 +71,12 @@ function showPage(pageId) {
         page.style.display = 'none';
     });
     document.getElementById(pageId).style.display = 'block';
+    updatePageTitle(pageId.replace('-page', '').replace(/-/g, ' '));
+}
+
+function updatePageTitle(title) {
+    const pageTitle = document.getElementById("page-title");
+    pageTitle.innerText = title.charAt(0).toUpperCase() + title.slice(1);
 }
 
 // Render Dashboard
@@ -94,7 +102,6 @@ function renderDeadlines() {
 function renderCalendar() {
     const calendarDiv = document.getElementById("dashboard-calendar");
     calendarDiv.innerHTML = "<p>Google Calendar events will appear here.</p>";
-    // Add logic to highlight current day and display events color-coded
 }
 
 // Render To-Do List
