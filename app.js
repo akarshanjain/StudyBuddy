@@ -48,11 +48,15 @@ function loginUser(email, password) {
     const userData = users.find(user => user.email === email && user.password === password);
     if (userData) {
         user = userData;
+        sessionStorage.setItem("loggedInUser", JSON.stringify(user)); // Save session
+        document.getElementById("login-page").style.display = "none";
+        document.getElementById("signup-page").style.display = "none";
         showDashboard();
     } else {
         alert("Invalid credentials");
     }
 }
+
 
 // Show Dashboard
 function showDashboard() {
@@ -71,8 +75,10 @@ function showPage(pageId) {
         page.style.display = 'none';
     });
     document.getElementById(pageId).style.display = 'block';
+    localStorage.setItem("currentPage", pageId); // Save the current page to localStorage
     updatePageTitle(pageId.replace('-page', '').replace(/-/g, ' '));
 }
+
 
 function updatePageTitle(title) {
     const pageTitle = document.getElementById("page-title");
@@ -134,6 +140,60 @@ function removeTodoItem(index) {
     renderTodoList();
 }
 
+// Logout User
+function logoutUser() {
+    sessionStorage.removeItem("loggedInUser"); // Clear sessionStorage
+    localStorage.removeItem("currentPage"); // Clear the saved page
+    user = null;
+    document.getElementById("main-navbar").style.display = "none"; // Hide navbar
+    document.getElementById("page-title-container").style.display = "none"; // Hide title
+    showPage("login-page"); // Redirect to login page
+}
+
+
+// Show Edit Profile Page
+function showEditProfile() {
+    document.getElementById("dashboard-page").style.display = "none";
+    document.getElementById("edit-profile-page").style.display = "block";
+    const savedUser = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (savedUser) {
+        const nameField = document.getElementById("edit-name");
+        const emailField = document.getElementById("edit-email");
+
+        nameField.value = savedUser.name || "";
+        emailField.value = savedUser.email || "";
+
+        // Add the 'prefilled' class if fields are not empty
+        nameField.classList.toggle("prefilled", !!savedUser.name);
+        emailField.classList.toggle("prefilled", !!savedUser.email);
+    }
+    updatePageTitle("Edit Profile");
+}
+
+
+// Handle Profile Update
+document.getElementById("edit-profile-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const newName = document.getElementById("edit-name").value;
+    const newEmail = document.getElementById("edit-email").value;
+
+    if (user) {
+        // Update user data
+        user.name = newName;
+        user.email = newEmail;
+
+        // Update users array
+        const userIndex = users.findIndex(u => u.email === user.email);
+        if (userIndex !== -1) {
+            users[userIndex] = { ...user, name: newName, email: newEmail };
+        }
+        localStorage.setItem("users", JSON.stringify(users)); // Save updated users
+        localStorage.setItem("loggedInUser", JSON.stringify(user)); // Save logged-in user
+        alert("Profile updated successfully!");
+        showDashboard();
+    }
+});
+
 // Google Calendar API initialization
 function initializeGoogleCalendar() {
     gapi.load('client:auth2', () => {
@@ -164,3 +224,35 @@ function fetchGoogleCalendarEvents() {
         renderDeadlines();
     });
 }
+
+// Check for logged-in user on page load
+document.addEventListener("DOMContentLoaded", () => {
+    const savedUser = sessionStorage.getItem("loggedInUser"); // Check sessionStorage for user
+    const savedPage = localStorage.getItem("currentPage") || "dashboard-page"; // Default to dashboard-page
+
+    if (savedUser) {
+        // If a user session exists
+        user = JSON.parse(savedUser); // Retrieve and assign the logged-in user
+        document.getElementById("main-navbar").style.display = "flex"; // Show navbar
+        document.getElementById("page-title-container").style.display = "flex"; // Show title
+        showPage(savedPage); // Redirect to the last visited page
+        document.getElementById("login-page").style.display = "none";
+        document.getElementById("signup-page").style.display = "none";
+    } else {
+        // No logged-in user; redirect to login page
+        document.getElementById("main-navbar").style.display = "none"; // Hide navbar
+        document.getElementById("page-title-container").style.display = "none"; // Hide title
+        showPage("login-page"); // Show login page
+    }
+});
+
+
+
+
+document.getElementById("edit-name").addEventListener("input", function () {
+    this.classList.remove("prefilled");
+});
+
+document.getElementById("edit-email").addEventListener("input", function () {
+    this.classList.remove("prefilled");
+});
