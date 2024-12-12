@@ -1,5 +1,7 @@
 let user = null; // Stores the current user data
 let users = JSON.parse(localStorage.getItem("users")) || []; // Mock users database
+let googleCalendarEvents = [];
+let todoList = JSON.parse(localStorage.getItem("todoList")) || []; // To-Do list items
 
 function toggleLoginSignUp() {
     document.getElementById("login-page").style.display = "none";
@@ -57,7 +59,8 @@ function showDashboard() {
     document.getElementById("login-page").style.display = "none";
     document.getElementById("signup-page").style.display = "none";
     document.getElementById("main-navbar").style.display = "block"; // Show navbar
-    showPage('calendar-page'); // Show default page after login
+    showPage('dashboard-page'); // Show default page after login
+    renderDashboard();
 }
 
 function showPage(pageId) {
@@ -66,6 +69,62 @@ function showPage(pageId) {
         page.style.display = 'none';
     });
     document.getElementById(pageId).style.display = 'block';
+}
+
+// Render Dashboard
+function renderDashboard() {
+    renderDeadlines();
+    renderCalendar();
+    renderTodoList();
+}
+
+// Render Upcoming Deadlines
+function renderDeadlines() {
+    const upcomingDeadlines = googleCalendarEvents.slice(0, 5);
+    const deadlinesList = document.getElementById("upcoming-deadlines");
+    deadlinesList.innerHTML = upcomingDeadlines.map(event => `
+        <li class="list-group-item">
+            <strong>${event.summary}</strong><br>
+            ${new Date(event.start.dateTime || event.start.date).toLocaleString()}
+        </li>
+    `).join('') || '<li class="list-group-item">No upcoming deadlines</li>';
+}
+
+// Render Calendar
+function renderCalendar() {
+    const calendarDiv = document.getElementById("dashboard-calendar");
+    calendarDiv.innerHTML = "<p>Google Calendar events will appear here.</p>";
+    // Add logic to highlight current day and display events color-coded
+}
+
+// Render To-Do List
+function renderTodoList() {
+    const todoListElement = document.getElementById("todo-list");
+    todoListElement.innerHTML = todoList.map((todo, index) => `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            ${todo.text}
+            <button class="btn btn-danger btn-sm" onclick="removeTodoItem(${index})">&times;</button>
+        </li>
+    `).join('') || '<li class="list-group-item">No to-do items</li>';
+}
+
+// Add To-Do Item
+function addTodoItem() {
+    const newItemText = prompt("Enter a new to-do item:");
+    if (newItemText) {
+        todoList.push({ text: newItemText });
+        localStorage.setItem("todoList", JSON.stringify(todoList));
+        renderTodoList();
+    }
+}
+
+document.getElementById("add-todo-btn").addEventListener("click", addTodoItem);
+
+// Remove To-Do Item
+function removeTodoItem(index) {
+    todoList.splice(index, 1);
+    localStorage.setItem("todoList", JSON.stringify(todoList));
+    renderTodoList();
 }
 
 // Google Calendar API initialization
@@ -95,24 +154,6 @@ function fetchGoogleCalendarEvents() {
         'orderBy': 'startTime'
     }).then((response) => {
         googleCalendarEvents = response.result.items;
-        displayCalendarEvents();
-    });
-}
-
-// Display calendar events
-function displayCalendarEvents() {
-    const eventList = document.getElementById('event-list');
-    eventList.innerHTML = googleCalendarEvents.map(event => `
-        <div class="calendar-event">
-            <strong>${event.summary}</strong>
-            <p>Date: ${new Date(event.start.dateTime || event.start.date).toLocaleString()}</p>
-        </div>
-    `).join('') || 'No upcoming events';
-}
-
-// Add a login with Google button in login page
-function handleGoogleSignIn() {
-    gapi.auth2.getAuthInstance().signIn().then(() => {
-        fetchGoogleCalendarEvents();
+        renderDeadlines();
     });
 }
