@@ -28,7 +28,6 @@
                 <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('calendar-page')">Calendar</a></li>
                 <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('todo-list-page')">To-Do List</a></li>
                 <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('notes-page')">Notes</a></li>
-                <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('flashcards-page')">Flashcards</a></li>
                 <!-- Profile Dropdown -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Profile</a>
@@ -98,7 +97,8 @@
                 <div class="col-md-6">
                     <div class="card p-3 shadow h-100">
                         <h4>Calendar</h4>
-                        <div id="dashboard-calendar" class="calendar-mini"></div> <!-- Add the mini calendar here -->
+                        <div id="dashboard-mini-calendar" class="mini-calendar"></div> <!-- Add the mini calendar here -->
+                        <button class="btn btn-primary mt-3 w-100" onclick="showPage('calendar-page')">Edit Calendar</button>
                     </div>
                 </div>
 
@@ -116,19 +116,71 @@
         </div>
     </div>
 
-    <!-- Other Pages -->
+    <!-- Calendar Page -->
     <div id="calendar-page" class="page" style="display: none;">
-        <h2 class="text-center">Calendar</h2>
-        <div id="calendar-container">
-            <div id="full-calendar"></div> <!-- FullCalendar rendering here -->
+        <div class="container mt-4">
+            <div class="d-flex justify-content-between mb-3">
+                <!-- Connect to Google Calendar Button -->
+                <button id="google-auth-btn" class="btn btn-primary" onclick="initializeGapi()">Connect to Google Calendar</button>
+                <!-- Add Event Button -->
+                <button class="btn btn-success" onclick="showAddEventModal()">+</button>
+            </div>
+            <!-- FullCalendar -->
+            <div id="full-calendar"></div>
         </div>
-    </div>    
+    
+        <!-- Add Event Modal -->
+        <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addEventModalLabel">Add Event</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addEventForm">
+                            <div class="form-group">
+                                <label for="eventDate">Date</label>
+                                <div class="d-flex">
+                                    <select id="eventDay" class="form-control mr-2">
+                                        <!-- Day options dynamically populated -->
+                                    </select>
+                                    <select id="eventMonth" class="form-control mr-2">
+                                        <!-- Month options dynamically populated -->
+                                    </select>
+                                    <select id="eventYear" class="form-control">
+                                        <!-- Year options dynamically populated -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="eventTitle">Event Title</label>
+                                <input type="text" id="eventTitle" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="eventDescription">Description (Optional)</label>
+                                <textarea id="eventDescription" class="form-control" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Event</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+       
+    
+    <!-- To-Do Page -->
     <div id="todo-list-page" class="page" style="display: none;">
         <div id="todo-list-tab-container">
             <!-- To-Do Items List -->
         </div>
         <button class="btn btn-primary mt-2 w-100" id="add-todo-btn-tab">+</button>
     </div>    
+    
+    <!-- Notes Page -->
     <div id="notes-page" class="page" style="display: none;">
         <div class="notes-container">
             <div class="notes-sidebar">
@@ -165,7 +217,7 @@
             </div>
         </div>
     </div>    
-    <div id="flashcards-page" class="page" style="display: none;">Flashcards Page</div>
+
     <!-- Event Title Modal -->
     <div class="modal fade" id="eventTitleModal" tabindex="-1" aria-labelledby="eventTitleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
