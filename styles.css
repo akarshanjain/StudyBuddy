@@ -115,12 +115,12 @@ body {
     height: 100%;
 }
 
-#dashboard-calendar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
+#dashboard-mini-calendar {
+    max-height: auto; /* Adjust this as needed for your layout */
+    overflow: hidden;
+    font-size: 0.85em; /* Slightly smaller font for the mini version */
 }
+
 
 /* To-Do List Button */
 #add-todo-btn {
@@ -301,3 +301,6 @@ body {
     display: inline; /* Show delete button on hover */
 }
 
+.fc-daygrid-day {
+    cursor: pointer; /* Change cursor to pointer on hover */
+}
