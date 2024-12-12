@@ -145,28 +145,47 @@
                     </div>
                     <div class="modal-body">
                         <form id="addEventForm">
+                            <!-- Date Selection Fields -->
                             <div class="form-group">
-                                <label for="eventDate">Date</label>
-                                <div class="d-flex">
-                                    <select id="eventDay" class="form-control mr-2">
-                                        <!-- Day options dynamically populated -->
-                                    </select>
-                                    <select id="eventMonth" class="form-control mr-2">
-                                        <!-- Month options dynamically populated -->
-                                    </select>
-                                    <select id="eventYear" class="form-control">
-                                        <!-- Year options dynamically populated -->
-                                    </select>
+                                <div class="d-flex justify-content-between">
+                                    <!-- Month Dropdown -->
+                                    <div class="mr-2 flex-fill">
+                                        <label for="eventMonth" class="form-label text-center">Month</label>
+                                        <select id="eventMonth" class="form-control">
+                                            <!-- Month options dynamically populated -->
+                                        </select>
+                                    </div>
+                                    <!-- Day Dropdown -->
+                                    <div class="mr-2 flex-fill">
+                                        <label for="eventDay" class="form-label text-center">Day</label>
+                                        <select id="eventDay" class="form-control">
+                                            <!-- Day options dynamically populated -->
+                                        </select>
+                                    </div>
+                                    <!-- Year Dropdown -->
+                                    <div class="flex-fill">
+                                        <label for="eventYear" class="form-label text-center">Year</label>
+                                        <select id="eventYear" class="form-control">
+                                            <!-- Year options dynamically populated -->
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
+                            
+
+                            <!-- Event Title -->
                             <div class="form-group">
-                                <label for="eventTitle">Event Title</label>
+                                <label for="eventTitle" class="form-label">Event Title</label>
                                 <input type="text" id="eventTitle" class="form-control" required>
                             </div>
+
+                            <!-- Event Description -->
                             <div class="form-group">
-                                <label for="eventDescription">Description (Optional)</label>
+                                <label for="eventDescription" class="form-label">Description (Optional)</label>
                                 <textarea id="eventDescription" class="form-control" rows="3"></textarea>
                             </div>
+
+                            <!-- Submit Button -->
                             <button type="submit" class="btn btn-primary">Add Event</button>
                         </form>
                     </div>
