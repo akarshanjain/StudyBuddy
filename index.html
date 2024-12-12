@@ -13,7 +13,7 @@
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light" id="main-navbar" style="display: none;">
-        <a class="navbar-brand" href="#">Study Buddy</a>
+        <a class="navbar-brand" href="javascript:void(0)" onclick="showDashboard()">Study Buddy</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -29,8 +29,13 @@
         </div>
     </nav>
 
+    <!-- Page Title -->
+    <div id="page-title-container" class="text-center my-3" style="display: none;">
+        <h2 id="page-title"></h2>
+    </div>
+
     <!-- Login Page -->
-    <div id="login-page" class="page">
+    <div id="login-page" class="loginpage">
         <h1>Welcome to Study Buddy</h1>
         <form id="login-form">
             <input type="email" id="email" placeholder="Email" required class="form-control mb-2"><br>
@@ -41,7 +46,7 @@
     </div>
 
     <!-- Sign-Up Page -->
-    <div id="signup-page" class="page" style="display: none;">
+    <div id="signup-page" class="loginpage" style="display: none;">
         <h1>Create a New Account</h1>
         <form id="signup-form">
             <input type="text" id="signup-name" placeholder="Full Name" required class="form-control mb-2"><br>
@@ -54,30 +59,38 @@
 
     <!-- Main Dashboard Page -->
     <div id="dashboard-page" class="page" style="display: none;">
-        <div class="row">
-            <!-- Upcoming Deadlines -->
-            <div class="col-md-3">
-                <h4>Upcoming Deadlines</h4>
-                <ul id="upcoming-deadlines" class="list-group">
-                    <!-- Upcoming deadlines will be dynamically loaded -->
-                </ul>
-            </div>
-
-            <!-- Calendar Integration -->
-            <div class="col-md-6">
-                <h4>Calendar</h4>
-                <div id="dashboard-calendar" class="calendar">
-                    <!-- Calendar will be dynamically rendered here -->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Upcoming Deadlines -->
+                <div class="col-md-3">
+                    <div class="card p-3 shadow h-100">
+                        <h4>Upcoming Deadlines</h4>
+                        <ul id="upcoming-deadlines" class="list-group">
+                            <li class="list-group-item">No upcoming deadlines</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
-            <!-- To-Do List -->
-            <div class="col-md-3">
-                <h4>To-Do List</h4>
-                <ul id="todo-list" class="list-group">
-                    <!-- To-Do items will be dynamically loaded -->
-                </ul>
-                <button class="btn btn-primary mt-2" id="add-todo-btn">+</button>
+                <!-- Calendar Integration -->
+                <div class="col-md-6">
+                    <div class="card p-3 shadow h-100">
+                        <h4>Calendar</h4>
+                        <div id="dashboard-calendar" class="calendar">
+                            <p>Google Calendar events will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- To-Do List -->
+                <div class="col-md-3">
+                    <div class="card p-3 shadow h-100">
+                        <h4>To-Do List</h4>
+                        <ul id="todo-list" class="list-group">
+                            <li class="list-group-item">No to-do items</li>
+                        </ul>
+                        <button class="btn btn-primary mt-2 w-100" id="add-todo-btn">+</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
