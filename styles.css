@@ -169,3 +169,62 @@ body {
     color: #212529; /* Reset to normal text color on focus */
     font-style: normal; /* Reset to normal style on focus */
 }
+
+/* Notes Page Layout */
+.notes-container {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 20px;
+    padding: 20px;
+}
+
+.notes-sidebar {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+}
+
+#notes-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+#notes-list li {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+#notes-list li:hover {
+    background-color: #f8f9fa;
+}
+
+.notes-main {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.notes-toolbar {
+    display: flex;
+    gap: 10px;
+}
+
+.notes-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+#notes-text {
+    width: 100%;
+    font-family: Arial;
+    font-size: 16px;
+    resize: none;
+}
+

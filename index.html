@@ -116,7 +116,42 @@
     <!-- Other Pages -->
     <div id="calendar-page" class="page" style="display: none;">Calendar Page</div>
     <div id="todo-list-page" class="page" style="display: none;">To-Do List Page</div>
-    <div id="notes-page" class="page" style="display: none;">Notes Page</div>
+    <div id="notes-page" class="page" style="display: none;">
+        <div class="notes-container">
+            <div class="notes-sidebar">
+                <h4>Saved Notes</h4>
+                <ul id="notes-list" class="list-group">
+                    <!-- Saved notes will be dynamically added here -->
+                </ul>
+            </div>
+            <div class="notes-main">
+                <div class="notes-toolbar">
+                    <select id="font-select" class="form-control">
+                        <option value="Arial">Arial</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Tahoma">Tahoma</option>
+                        <option value="Verdana">Verdana</option>
+                    </select>
+                    <select id="font-size-select" class="form-control">
+                        <option value="12px">12px</option>
+                        <option value="14px">14px</option>
+                        <option value="16px" selected>16px</option>
+                        <option value="18px">18px</option>
+                        <option value="20px">20px</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="toggleBold()">B</button>
+                    <button class="btn btn-secondary" onclick="toggleItalic()">I</button>
+                    <button class="btn btn-secondary" onclick="toggleBulletPoints()">•</button>
+                </div>
+                <textarea id="notes-text" class="form-control" rows="10" placeholder="Write your notes here..."></textarea>
+                <div class="notes-actions">
+                    <button class="btn btn-primary" onclick="createNewNote()">Create New Note</button>
+                    <button class="btn btn-success" onclick="saveNote()">Save Note</button>
+                </div>
+            </div>
+        </div>
+    </div>    
     <div id="flashcards-page" class="page" style="display: none;">Flashcards Page</div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>

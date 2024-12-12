@@ -2,6 +2,14 @@ let user = null; // Stores the current user data
 let users = JSON.parse(localStorage.getItem("users")) || []; // Mock users database
 let googleCalendarEvents = [];
 let todoList = JSON.parse(localStorage.getItem("todoList")) || []; // To-Do list items
+let notes = [];
+const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
+
+if (loggedInUser && allNotes[loggedInUser.email]) {
+    notes = allNotes[loggedInUser.email];
+}
+let currentNote = { title: "", content: "", styles: { font: "Arial", size: "16px" } };
 
 function toggleLoginSignUp() {
     document.getElementById("login-page").style.display = "none";
@@ -227,6 +235,7 @@ function fetchGoogleCalendarEvents() {
 
 // Check for logged-in user on page load
 document.addEventListener("DOMContentLoaded", () => {
+    renderNotesList();
     const savedUser = sessionStorage.getItem("loggedInUser"); // Check sessionStorage for user
     const savedPage = localStorage.getItem("currentPage") || "dashboard-page"; // Default to dashboard-page
 
@@ -255,4 +264,107 @@ document.getElementById("edit-name").addEventListener("input", function () {
 
 document.getElementById("edit-email").addEventListener("input", function () {
     this.classList.remove("prefilled");
+});
+
+
+function createNewNote() {
+    currentNote = { title: "", content: "", styles: { font: "Arial", size: "16px" } };
+    document.getElementById("notes-text").value = "";
+    document.getElementById("font-select").value = "Arial";
+    document.getElementById("font-size-select").value = "16px";
+    document.getElementById("notes-text").style.fontFamily = "Arial";
+    document.getElementById("notes-text").style.fontSize = "16px";
+}
+
+function saveNote() {
+    const noteContent = document.getElementById("notes-text").value;
+    if (!noteContent.trim()) {
+        alert("Cannot save an empty note.");
+        return;
+    }
+    const noteTitle = prompt("Enter a title for your note:");
+    if (!noteTitle) {
+        alert("Title is required to save the note.");
+        return;
+    }
+
+    // Save the note with title, content, and styles
+    currentNote.title = noteTitle;
+    currentNote.content = noteContent;
+    currentNote.styles.font = document.getElementById("font-select").value;
+    currentNote.styles.size = document.getElementById("font-size-select").value;
+
+    // Add the note to the notes array
+    notes.push({ ...currentNote });
+
+    // Update localStorage for the current user
+    const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
+    const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+
+    if (loggedInUser) {
+        allNotes[loggedInUser.email] = notes;
+        localStorage.setItem("notes", JSON.stringify(allNotes));
+    }
+
+    // Re-render the notes list
+    renderNotesList();
+
+    alert("Note saved successfully!");
+}
+
+
+function renderNotesList() {
+    const notesList = document.getElementById("notes-list");
+    const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+
+    if (!loggedInUser) {
+        notesList.innerHTML = '<li>No saved notes</li>';
+        return;
+    }
+
+    if (notes.length === 0) {
+        notesList.innerHTML = '<li>No saved notes</li>';
+        return;
+    }
+
+    // Dynamically generate the list of saved notes
+    notesList.innerHTML = notes.map((note, index) => `
+        <li class="list-group-item" onclick="loadNote(${index})">${note.title}</li>
+    `).join('');
+}
+
+
+function loadNote(index) {
+    const note = notes[index];
+    document.getElementById("notes-text").value = note.content;
+    document.getElementById("font-select").value = note.styles.font;
+    document.getElementById("font-size-select").value = note.styles.size;
+    document.getElementById("notes-text").style.fontFamily = note.styles.font;
+    document.getElementById("notes-text").style.fontSize = note.styles.size;
+    currentNote = { ...note };
+}
+
+function toggleBold() {
+    const textBox = document.getElementById("notes-text");
+    textBox.style.fontWeight = textBox.style.fontWeight === "bold" ? "normal" : "bold";
+}
+
+function toggleItalic() {
+    const textBox = document.getElementById("notes-text");
+    textBox.style.fontStyle = textBox.style.fontStyle === "italic" ? "normal" : "italic";
+}
+
+function toggleBulletPoints() {
+    const textBox = document.getElementById("notes-text");
+    const lines = textBox.value.split("\n");
+    textBox.value = lines.map(line => line.startsWith("• ") ? line.slice(2) : `• ${line}`).join("\n");
+}
+
+// Apply font changes dynamically
+document.getElementById("font-select").addEventListener("change", function () {
+    document.getElementById("notes-text").style.fontFamily = this.value;
+});
+
+document.getElementById("font-size-select").addEventListener("change", function () {
+    document.getElementById("notes-text").style.fontSize = this.value;
 });
