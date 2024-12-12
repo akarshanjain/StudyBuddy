@@ -119,12 +119,11 @@
     <!-- Calendar Page -->
     <div id="calendar-page" class="page" style="display: none;">
         <div class="container mt-4">
-            <div class="d-flex justify-content-between mb-3">
-                <!-- Connect to Google Calendar Button -->
-                <button id="google-auth-btn" class="btn btn-primary" onclick="initializeGapi()">Connect to Google Calendar</button>
-                <!-- Add Event Button -->
-                <button class="btn btn-success" onclick="showAddEventModal()">+</button>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <button id="googleCalendarConnect" class="btn btn-primary" onclick="initializeGoogleCalendar()">Connect to Google Calendar</button>
+                <button id="addEventButton" class="btn btn-success" onclick="showAddEventModal()">+</button>
             </div>
+            
             <!-- FullCalendar -->
             <div id="full-calendar"></div>
         </div>
