@@ -145,11 +145,7 @@ function renderFullCalendar() {
         height: "auto",
         editable: true,
         selectable: true,
-        events: googleCalendarEvents.map(event => ({
-            title: event.summary,
-            start: event.start.dateTime || event.start.date,
-            end: event.end.dateTime || event.end.date,
-        })),
+        events: loadSavedEvents(), // Load events from localStorage
         headerToolbar: {
             left: "prev,next today",
             center: "title",
@@ -200,6 +196,12 @@ function renderFullCalendar() {
 
     fullCalendarInstance.render();
 }
+
+// Function to load events from localStorage
+function loadSavedEvents() {
+    return JSON.parse(localStorage.getItem("savedCalendarEvents")) || [];
+}
+
 
 document.getElementById("addEventForm").addEventListener("submit", function (event) {
     event.preventDefault();
@@ -262,8 +264,9 @@ function populateDateDropdowns(date) {
 function saveEvent(event) {
     const savedEvents = JSON.parse(localStorage.getItem("savedCalendarEvents")) || [];
     savedEvents.push(event);
-    localStorage.setItem("savedCalendarEvents", JSON.stringify(savedEvents));
+    localStorage.setItem("savedCalendarEvents", JSON.stringify(savedEvents)); // Save to localStorage
 }
+
 
 function deleteEvent(eventId) {
     const savedEvents = JSON.parse(localStorage.getItem("savedCalendarEvents")) || [];
