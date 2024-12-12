@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <!-- Navbar (hidden by default) -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light" id="main-navbar" style="display: none;">
         <a class="navbar-brand" href="#">Study Buddy</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,6 +19,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('dashboard-page')">Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('calendar-page')">Calendar</a></li>
                 <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('todo-list-page')">To-Do List</a></li>
                 <li class="nav-item"><a class="nav-link" href="javascript:void(0)" onclick="showPage('notes-page')">Notes</a></li>
@@ -51,7 +52,37 @@
         <p>Already have an account? <a href="javascript:void(0)" onclick="toggleSignUpLogin()">Login</a></p>
     </div>
 
-    <!-- Pages -->
+    <!-- Main Dashboard Page -->
+    <div id="dashboard-page" class="page" style="display: none;">
+        <div class="row">
+            <!-- Upcoming Deadlines -->
+            <div class="col-md-3">
+                <h4>Upcoming Deadlines</h4>
+                <ul id="upcoming-deadlines" class="list-group">
+                    <!-- Upcoming deadlines will be dynamically loaded -->
+                </ul>
+            </div>
+
+            <!-- Calendar Integration -->
+            <div class="col-md-6">
+                <h4>Calendar</h4>
+                <div id="dashboard-calendar" class="calendar">
+                    <!-- Calendar will be dynamically rendered here -->
+                </div>
+            </div>
+
+            <!-- To-Do List -->
+            <div class="col-md-3">
+                <h4>To-Do List</h4>
+                <ul id="todo-list" class="list-group">
+                    <!-- To-Do items will be dynamically loaded -->
+                </ul>
+                <button class="btn btn-primary mt-2" id="add-todo-btn">+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other Pages -->
     <div id="calendar-page" class="page" style="display: none;">Calendar Page</div>
     <div id="todo-list-page" class="page" style="display: none;">To-Do List Page</div>
     <div id="notes-page" class="page" style="display: none;">Notes Page</div>
