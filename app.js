@@ -195,6 +195,7 @@ function renderFullCalendar() {
     });
 
     fullCalendarInstance.render();
+    renderMiniCalendar();
 }
 
 // Function to load events from localStorage
@@ -214,18 +215,21 @@ document.getElementById("addEventForm").addEventListener("submit", function (eve
 
     const eventDate = new Date(year, month, day).toISOString();
 
+    // Add event to full calendar
     fullCalendarInstance.addEvent({
         id: Date.now().toString(),
         title,
         start: eventDate,
-        extendedProps: {
-            description,
-        },
+        extendedProps: { description },
     });
 
+    // Save event and refresh mini calendar
     saveEvent({ id: Date.now().toString(), title, start: eventDate, description });
+    renderMiniCalendar(); // Refresh the mini calendar
+
     $('#addEventModal').modal('hide');
 });
+
 
 function showAddEventModal(date = new Date()) {
     // Autofill the dropdowns with the given or current date
@@ -272,7 +276,12 @@ function deleteEvent(eventId) {
     const savedEvents = JSON.parse(localStorage.getItem("savedCalendarEvents")) || [];
     const updatedEvents = savedEvents.filter(event => event.id !== eventId);
     localStorage.setItem("savedCalendarEvents", JSON.stringify(updatedEvents));
+
+    // Refresh both calendars
+    fullCalendarInstance.refetchEvents();
+    renderMiniCalendar();
 }
+
 
 function renderTodoList() {
     const todoListElement = document.getElementById("todo-list");
@@ -303,26 +312,26 @@ function renderTodoListTab() {
 function renderMiniCalendar() {
     const miniCalendarEl = document.getElementById("dashboard-mini-calendar");
 
-    // Remove existing instance if already rendered
-    if (miniCalendarEl.fullCalendar) miniCalendarEl.fullCalendar.destroy();
+    // Clear any existing content to avoid duplicate rendering
+    miniCalendarEl.innerHTML = "";
+
+    const savedEvents = loadSavedEvents(); // Fetch saved events
 
     const miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
         initialView: "dayGridMonth",
-        events: googleCalendarEvents.map(event => ({
-            title: event.summary,
-            start: event.start.dateTime || event.start.date,
-            end: event.end.dateTime || event.end.date,
-        })),
+        events: savedEvents, // Use shared events
         headerToolbar: {
-            left: "prev,next today",
+            left: "prev,next",
             center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
+            right: "", // Mini calendar doesn't need view-switch buttons
         },
-        fixedWeekCount: false,
+        selectable: false,
+        editable: false,
     });
 
     miniCalendar.render();
 }
+
 
 
 
